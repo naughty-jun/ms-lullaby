@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>対ララバイ - デッキ編成シミュレーター</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div>
+          <div>対ララバイ</div>
+          <div>デッキ編成シミュレーター</div>
+        </div>
+        <div class="deck-summary">
+          <span class="summary-label">デッキ合計HP</span>
+          <span class="summary-value">{{ totalHp.toLocaleString() }}</span>
+        </div>
+      </header>
+
+      <div class="roster">
+        <span class="roster-label">編成中</span>
+        <ul v-if="selectedNames.length" class="roster-list">
+          <li v-for="(name, i) in selectedNames" :key="i" class="roster-item">
+            {{ name }}
+          </li>
+        </ul>
+        <span v-else class="roster-empty">キャラ未選択</span>
+      </div>
+
+      <main class="deck">
+        <section
+          v-for="(slot, slotIndex) in deck"
+          :key="slotIndex"
+          class="slot"
+          :class="{ 'slot--empty': !characterOf(slot) }"
+        >
+          <!-- キャラ選択 -->
+          <div class="slot-head">
+            <span class="slot-no">{{ slotIndex + 1 }}</span>
+            <select
+              class="char-select"
+              :value="slot.characterId || ''"
+              @change="selectCharacter(slotIndex, $event.target.value)"
+            >
+              <option value="">-- キャラを選択 --</option>
+              <option
+                v-for="character in characters"
+                :key="character.id"
+                :value="character.id"
+              >
+                {{ character.name }}
+              </option>
+            </select>
+            <button
+              class="btn btn--level"
+              :disabled="!characterOf(slot) || !canToggleLevel(slot)"
+              title="レベル上限を切り替え (Lv99 / Lv120)"
+              @click="toggleLevel(slotIndex)"
+            >
+              Lv{{ characterOf(slot) ? levelOf(slot) : "-" }}
+            </button>
+            <button
+              class="btn btn--clear"
+              :disabled="!characterOf(slot)"
+              @click="clearSlot(slotIndex)"
+            >
+              クリア
+            </button>
+          </div>
+
+          <!-- キャラ情報(未選択でも枠は常時表示。値はプレースホルダ) -->
+          <div class="char-body">
+            <dl class="char-info">
+              <div><dt>種族</dt><dd>{{ characterOf(slot) ? characterOf(slot).race : "-" }}</dd></div>
+              <div><dt>撃種</dt><dd>{{ characterOf(slot) ? characterOf(slot).hitType : "-" }}</dd></div>
+              <div><dt>戦型</dt><dd>{{ characterOf(slot) ? characterOf(slot).battleType : "-" }}</dd></div>
+              <div>
+                <dt>攻撃力</dt>
+                <dd class="attack-value">
+                  <template v-if="characterOf(slot)">
+                    {{ attacks[slotIndex].toLocaleString() }}
+                    <small
+                      v-if="attacks[slotIndex] > baseStatFor(slot).attack"
+                      class="attack-bonus"
+                    >
+                      (+{{ (attacks[slotIndex] - baseStatFor(slot).attack).toLocaleString() }})
+                    </small>
+                  </template>
+                  <template v-else>-</template>
+                </dd>
+              </div>
+              <div>
+                <dt>HP</dt>
+                <dd class="hp-value">
+                  <template v-if="characterOf(slot)">
+                    {{ hps[slotIndex].toLocaleString() }}
+                    <small
+                      v-if="hps[slotIndex] > baseStatFor(slot).hp"
+                      class="hp-bonus"
+                    >
+                      (+{{ (hps[slotIndex] - baseStatFor(slot).hp).toLocaleString() }})
+                    </small>
+                  </template>
+                  <template v-else>-</template>
+                </dd>
+              </div>
+            </dl>
+
+            <!-- わくわくの実(常に4枠のセレクトボックスを表示) -->
+            <div class="fruits">
+              <div class="fruits-head"><span>わくわくの実</span></div>
+
+              <ul class="fruit-list">
+                <li
+                  v-for="(equipped, fruitIndex) in slot.fruits"
+                  :key="fruitIndex"
+                  class="fruit-item"
+                  :class="{ 'fruit-item--dup': isDuplicated(slotIndex, fruitIndex) }"
+                >
+                  <select
+                    class="fruit-select"
+                    :disabled="!characterOf(slot)"
+                    :value="equipped.fruitId || ''"
+                    @change="setFruit(slotIndex, fruitIndex, $event.target.value)"
+                  >
+                    <option value="">-- なし --</option>
+                    <option
+                      v-for="fruit in fruits"
+                      :key="fruit.id"
+                      :value="fruit.id"
+                    >
+                      {{ fruit.name }}{{ wouldDuplicateFruit(slotIndex, fruitIndex, fruit.id) ? "（重複）" : "" }}
+                    </option>
+                  </select>
+                  <span
+                    v-if="isDuplicated(slotIndex, fruitIndex)"
+                    class="dup-badge"
+                    title="同じ効果の実がデッキ内で重複しています(1つ分しか効きません)"
+                  >
+                    重複
+                  </span>
+                  <button
+                    class="btn btn--grade"
+                    :class="{ 'btn--grade-el': equipped.grade === 'EL' }"
+                    :disabled="!equipped.fruitId"
+                    @click="toggleGrade(slotIndex, fruitIndex)"
+                  >
+                    {{ equipped.grade }}
+                  </button>
+                  <button
+                    class="btn btn--clear-fruit"
+                    :disabled="!equipped.fruitId"
+                    title="この実をクリア"
+                    @click="clearFruit(slotIndex, fruitIndex)"
+                  >
+                    ×
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Vue 本体(ローカル・prod) -> データ -> 計算 -> アプリ の順で読み込む -->
+    <script src="vue.global.prod.min.js"></script>
+    <script src="data.js"></script>
+    <script src="calc.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

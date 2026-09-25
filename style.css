@@ -1,0 +1,328 @@
+:root {
+  --bg: #0f1220;
+  --panel: #1b2036;
+  --panel-2: #232a45;
+  --line: #333c5e;
+  --text: #e8ebf5;
+  --muted: #9aa3c7;
+  --accent: #5b8cff;
+  --accent-2: #ff7ad9;
+  --el: #ffb347;
+  --danger: #ff5c72;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+#app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+/* ヘッダー */
+.app-header {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.app-header h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.deck-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 16px;
+}
+
+.summary-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-2);
+}
+
+/* 編成中キャラ一覧 */
+.roster {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.roster-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.roster-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  gap: 8px;
+}
+
+.roster-item {
+  flex: 1;
+  text-align: center;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.roster-empty {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* デッキ */
+/* カードが最小幅(320px)を下回ると自動で列数が減り、狭い幅では1列に折り返す */
+.deck {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.slot {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  min-width: 0;
+}
+
+.slot--empty {
+  opacity: 0.85;
+}
+
+.slot-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slot-no {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.char-select {
+  flex: 1;
+}
+
+select {
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+select:focus {
+  outline: 2px solid var(--accent);
+}
+
+select:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* キャラ情報 */
+.char-body {
+  margin-top: 12px;
+}
+
+.char-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 12px;
+  margin: 0 0 14px;
+}
+
+.char-info > div {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed var(--line);
+  padding: 4px 0;
+}
+
+.char-info dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.char-info dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.attack-value {
+  color: var(--accent-2);
+}
+
+.hp-value {
+  color: #6fe0a8;
+}
+
+.attack-bonus,
+.hp-bonus {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* わくわくの実 */
+.fruits {
+  background: var(--panel-2);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.fruits-head {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.fruit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fruit-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+
+.fruit-item--dup {
+  border-color: var(--danger);
+  background: rgba(255, 92, 114, 0.1);
+}
+
+.fruit-select {
+  flex: 1;
+  min-width: 0;
+}
+
+.dup-badge {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--danger);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+
+/* ボタン */
+.btn {
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 10px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.btn--level {
+  background: var(--panel-2);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  flex: none;
+}
+
+.btn--level:not(:disabled):hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--clear {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.btn--clear:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn--grade {
+  background: var(--accent);
+  min-width: 42px;
+}
+
+.btn--grade-el {
+  background: var(--el);
+  color: #3a2a00;
+}
+
+.btn--clear-fruit {
+  flex: none;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  padding: 5px 9px;
+}
+
+.btn--clear-fruit:not(:disabled):hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
